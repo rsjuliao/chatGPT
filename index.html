@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Beep com Javascript</title>
+  </head>
+  <body>
+    <button onclick="jogoMorse()">Pressione para Beep</button>
+    
+    <script>	
+
+
+function beep(t, f) {
+  return new Promise(function(resolve, reject) {
+    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    var oscillator = audioCtx.createOscillator();
+    oscillator.type = "triangle";
+    oscillator.frequency.value = f;
+    oscillator.connect(audioCtx.destination);
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + t / 1000);
+
+    // Libera a instância de áudio após a reprodução
+    oscillator.onended = function() {
+      oscillator.disconnect();
+      audioCtx.close();
+      resolve();
+    };
+  });
+}
+
+
+
+
+
+
+
+ // função que reproduz um caractere morse com a unidade de tempo e frequência especificadas
+      async function playMorse(char, timeUnit, frequency) {
+        var beepTime = timeUnit * 3;
+       
+        var dot = timeUnit;
+        var dash = timeUnit * 3;
+ 	var pauseTime = timeUnit * 3;
+
+        switch (char) {
+          case '.':
+            await beep(dot, frequency);
+            break;
+          case '-':
+            await beep(dash, frequency);
+            break;
+          case ' ':
+            await beep(pauseTime,0);
+            break;
+          default:
+            console.log('Invalid Morse character: ' + char);
+        }
+      }
+
+
+  const morseCode = {
+    'a': '.-',    'b': '-...',  'c': '-.-.',  'd': '-..',
+    'e': '.',     'f': '..-.',  'g': '--.',   'h': '....',
+    'i': '..',    'j': '.---',  'k': '-.-',   'l': '.-..',
+    'm': '--',    'n': '-.',    'o': '---',   'p': '.--.',
+    'q': '--.-',  'r': '.-.',   's': '...',   't': '-',
+    'u': '..-',   'v': '...-',  'w': '.--',   'x': '-..-',
+    'y': '-.--',  'z': '--..',  '0': '-----', '1': '.----',
+    '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+    '6': '-....', '7': '--...', '8': '---..', '9': '----.'
+  };
+
+async  function playMorseForLetter(letter) {
+
+  
+  const letterLowerCase = letter.toLowerCase();
+  const morseChar = morseCode[letterLowerCase];
+
+  if (morseChar) {
+    for (let i = 0; i < morseChar.length; i++) {
+      await  playMorse(morseChar[i], 107, 450);
+    }
+  } else {
+    console.log(`A letra "${letter}" não tem uma representação em código Morse.`);
+  }
+}
+
+
+async function playFrase(frase) {
+  for (var i = 0; i < frase.length; i++) {
+    var letter = frase[i];
+    await   playMorseForLetter(letter);
+    await   playMorseForLetter(' ');
+
+  }
+}
+
+
+async  function jogoMorse() {
+  // Escolhe uma letra aleatória do objeto morseCode
+  const letras = Object.keys(morseCode);
+  const letraEscolhida = letras[Math.floor(Math.random() * letras.length)];
+
+  // Toca o áudio correspondente à letra escolhida
+  const codigo = morseCode[letraEscolhida];
+console.log('caracter escolhido: '+letraEscolhida);
+  await   playFrase(letraEscolhida);
+
+  // Espera o usuário digitar uma letra
+  const letraDigitada = prompt('Digite a letra correspondente ao código Morse tocado:');
+
+  // Verifica se o usuário acertou
+  if (letraDigitada === letraEscolhida) {
+    console.log('Acertou!');
+  } else {
+    console.log('Errou!');
+  }
+}
+    </script>
+  </body>
+</html>
