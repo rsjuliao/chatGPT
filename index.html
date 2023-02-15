@@ -2,231 +2,231 @@
 <html>
 
 <head>
-    <title>Código Morse</title>
-    <meta charset="utf-8">
+  <title>Código Morse</title>
+  <meta charset="utf-8">
 
-    <!-- Adicionando a biblioteca Twitter Bootstrap -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
+  <!-- Adicionando a biblioteca Twitter Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
 
-    <style>
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding-top: 50px;
-        }
+  <style>
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding-top: 50px;
+    }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 10px;
-            border: none;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
-        }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      margin-bottom: 20px;
+    }
 
-        #pontuacao {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 50px;
-        }
-    </style>
+    #pontuacao {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 50px;
+    }
+  </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>Código Morse</h1>
-        <p>Escreva a frase abaixo em código Morse e pressione Enter:</p>
-        <input type="text" id="fraseMorse">
-        <div id="pontuacao">Pontuação: 0</div>
-        <h1>
-            <pre><div id="tabela" style="font-family: Arial;">tabela</div></pre>
-        </h1>
+  <div class="container">
+    <h1>Código Morse</h1>
+    <p>Escreva a frase abaixo em código Morse e pressione Enter:</p>
+    <input type="text" id="fraseMorse">
+    <div id="pontuacao">Pontuação: 0</div>
+    <h1>
+      <pre><div id="tabela" style="font-family: Arial;">tabela</div></pre>
+    </h1>
 
-    </div>
+  </div>
 
-    <script>
+  <script>
+
+    const morseCode = {
+      'a': '.-', 'b': '-...', 'c': '-.-.', 'd': '-..',
+      'e': '.', 'f': '..-.', 'g': '--.', 'h': '....',
+      'i': '..', 'j': '.---', 'k': '-.-', 'l': '.-..',
+      'm': '--', 'n': '-.', 'o': '---', 'p': '.--.',
+      'q': '--.-', 'r': '.-.', 's': '...', 't': '-',
+      'u': '..-', 'v': '...-', 'w': '.--', 'x': '-..-',
+      'y': '-.--', 'z': '--..', '0': '-----', '1': '.----',
+      '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+      '6': '-....', '7': '--...', '8': '---..', '9': '----.'
+    };
+    // Inicializando a pontuação
+    let pontos = 0;
 
 
-        // Inicializando a pontuação
-        let pontos = 0;
 
+    // Obtendo a caixa de texto e a div da pontuação
+    const inputFrase = document.getElementById("fraseMorse");
+    const divPontuacao = document.getElementById("pontuacao");
 
+    var frase = "";
 
-        // Obtendo a caixa de texto e a div da pontuação
-        const inputFrase = document.getElementById("fraseMorse");
-        const divPontuacao = document.getElementById("pontuacao");
-
-        var frase = "";
-
+    fraseAleatorio();
+    // Adicionando um listener para o evento "keyup" na caixa de texto
+    inputFrase.addEventListener("keyup", function (event) {
+      if (event.key === "Enter") { // Se o Enter foi pressionado
+        const fraseDigitada = inputFrase.value.trim(); // Obtendo o valor da caixa de texto e removendo espaços em branco
+        if (fraseDigitada === frase) { // Se a frase digitada for igual à frase em Morse
+          pontos++; // Incrementa a pontuação
+          divPontuacao.innerText = "Pontuação: " + pontos; // Atualiza o texto da div da pontuação
+        } else {
+          pontos = 0;
+          divPontuacao.innerText = "ERROU!!!!"; // Atualiza o texto da div da pontuação
+        }
+        inputFrase.value = ""; // Limpa a caixa de texto
         fraseAleatorio();
-        // Adicionando um listener para o evento "keyup" na caixa de texto
-        inputFrase.addEventListener("keyup", function (event) {
-            if (event.key === "Enter") { // Se o Enter foi pressionado
-                const fraseDigitada = inputFrase.value.trim(); // Obtendo o valor da caixa de texto e removendo espaços em branco
-                if (fraseDigitada === frase) { // Se a frase digitada for igual à frase em Morse
-                    pontos++; // Incrementa a pontuação
-                    divPontuacao.innerText = "Pontuação: " + pontos; // Atualiza o texto da div da pontuação
-                } else {
-                    pontos = 0;
-                    divPontuacao.innerText = "ERROU!!!!"; // Atualiza o texto da div da pontuação
-                }
-                inputFrase.value = ""; // Limpa a caixa de texto
-                fraseAleatorio();
 
-            }
-        });
+      }
+    });
 
 
 
 
-        function beep(t, f) {
-            return new Promise(function (resolve, reject) {
-                var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                var oscillator = audioCtx.createOscillator();
-                oscillator.type = "triangle";
-                oscillator.frequency.value = f;
-                oscillator.connect(audioCtx.destination);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + t / 1000);
+    function beep(t, f) {
+      return new Promise(function (resolve, reject) {
+        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var oscillator = audioCtx.createOscillator();
+        oscillator.type = "triangle";
+        oscillator.frequency.value = f;
+        oscillator.connect(audioCtx.destination);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + t / 1000);
 
-                // Libera a instância de áudio após a reprodução
-                oscillator.onended = function () {
-                    oscillator.disconnect();
-                    audioCtx.close();
-                    resolve();
-                };
-            });
-        }
-
-
-
-
-
-
-
-        // função que reproduz um caractere morse com a unidade de tempo e frequência especificadas
-        async function playMorse(char, timeUnit, frequency) {
-            var beepTime = timeUnit * 3;
-
-            var dot = timeUnit;
-            var dash = timeUnit * 3;
-            var pauseTime = timeUnit * 3;
-
-            switch (char) {
-                case '.':
-                    await beep(dot, frequency);
-                    break;
-                case '-':
-                    await beep(dash, frequency);
-                    break;
-                case ' ':
-                    await beep(pauseTime, 0);
-                    break;
-                default:
-                    console.log('Invalid Morse character: ' + char);
-            }
-        }
-
-
-        const morseCode = {
-            'a': '.-', 'b': '-...', 'c': '-.-.', 'd': '-..',
-            'e': '.', 'f': '..-.', 'g': '--.', 'h': '....',
-            'i': '..', 'j': '.---', 'k': '-.-', 'l': '.-..',
-            'm': '--', 'n': '-.', 'o': '---', 'p': '.--.',
-            'q': '--.-', 'r': '.-.', 's': '...', 't': '-',
-            'u': '..-', 'v': '...-', 'w': '.--', 'x': '-..-',
-            'y': '-.--', 'z': '--..', '0': '-----', '1': '.----',
-            '2': '..---', '3': '...--', '4': '....-', '5': '.....',
-            '6': '-....', '7': '--...', '8': '---..', '9': '----.'
+        // Libera a instância de áudio após a reprodução
+        oscillator.onended = function () {
+          oscillator.disconnect();
+          audioCtx.close();
+          resolve();
         };
+      });
+    }
 
-        async function playMorseForLetter(letter) {
 
 
-            const letterLowerCase = letter.toLowerCase();
-            const morseChar = morseCode[letterLowerCase];
 
-            if (morseChar) {
-                for (let i = 0; i < morseChar.length; i++) {
-                    await playMorse(morseChar[i], 107, 450);
-                }
-            } else {
-                console.log(`A letra "${letter}" não tem uma representação em código Morse.`);
-            }
+
+
+
+    // função que reproduz um caractere morse com a unidade de tempo e frequência especificadas
+    async function playMorse(char, timeUnit, frequency) {
+      var beepTime = timeUnit * 3;
+
+      var dot = timeUnit;
+      var dash = timeUnit * 3;
+      var pauseTime = timeUnit * 3;
+
+      switch (char) {
+        case '.':
+          await beep(dot, frequency);
+          break;
+        case '-':
+          await beep(dash, frequency);
+          break;
+        case ' ':
+          await beep(pauseTime, 0);
+          break;
+        default:
+          console.log('Invalid Morse character: ' + char);
+      }
+    }
+
+
+
+
+    async function playMorseForLetter(letter) {
+
+
+      const letterLowerCase = letter.toLowerCase();
+      const morseChar = morseCode[letterLowerCase];
+
+      if (morseChar) {
+        for (let i = 0; i < morseChar.length; i++) {
+          await playMorse(morseChar[i], 107, 450);
+        }
+      } else {
+        console.log(`A letra "${letter}" não tem uma representação em código Morse.`);
+      }
+    }
+
+
+    async function playFrase(frase) {
+      for (var i = 0; i < frase.length; i++) {
+        var letter = frase[i];
+        await playMorseForLetter(letter);
+        await playMorseForLetter(' ');
+
+      }
+    }
+
+
+
+    async function fraseAleatorio() {
+      const letras = Object.keys(morseCode);
+      const letraEscolhida = letras[Math.floor(Math.random() * letras.length)];
+      frase = letraEscolhida;
+      await playFrase(letraEscolhida);
+
+    }
+    async function jogoMorse() {
+      // Escolhe uma letra aleatória do objeto morseCode
+      const letras = Object.keys(morseCode);
+      const letraEscolhida = letras[Math.floor(Math.random() * letras.length)];
+
+      // Toca o áudio correspondente à letra escolhida
+      const codigo = morseCode[letraEscolhida];
+      console.log('caracter escolhido: ' + letraEscolhida);
+      await playFrase(letraEscolhida);
+
+      // Espera o usuário digitar uma letra
+      //const letraDigitada = prompt('Digite a letra correspondente ao código Morse tocado:');
+
+      // Verifica se o usuário acertou
+      //if (letraDigitada === letraEscolhida) {
+      //  console.log('Acertou!');
+      //} else {
+      //  console.log('Errou!');
+      //}
+    }
+
+
+    function desenhaTabela() {
+      const tabela = document.getElementById("tabela");
+      var texto = "";
+
+      var i = 0;
+      for (let letra in morseCode) {
+        const codigoMorse = morseCode[letra];
+        texto += letra + ":\t" + codigoMorse + "\t";
+        i++;
+        if (i % 3 == 0) {
+          texto += "\n";
         }
 
+      }
 
-        async function playFrase(frase) {
-            for (var i = 0; i < frase.length; i++) {
-                var letter = frase[i];
-                await playMorseForLetter(letter);
-                await playMorseForLetter(' ');
+      tabela.innerText = texto;
 
-            }
-        }
+    }
+    desenhaTabela();
+  </script>
 
-
-
-        async function fraseAleatorio() {
-            const letras = Object.keys(morseCode);
-            const letraEscolhida = letras[Math.floor(Math.random() * letras.length)];
-            frase = letraEscolhida;
-            await playFrase(letraEscolhida);
-
-        }
-        async function jogoMorse() {
-            // Escolhe uma letra aleatória do objeto morseCode
-            const letras = Object.keys(morseCode);
-            const letraEscolhida = letras[Math.floor(Math.random() * letras.length)];
-
-            // Toca o áudio correspondente à letra escolhida
-            const codigo = morseCode[letraEscolhida];
-            console.log('caracter escolhido: ' + letraEscolhida);
-            await playFrase(letraEscolhida);
-
-            // Espera o usuário digitar uma letra
-            //const letraDigitada = prompt('Digite a letra correspondente ao código Morse tocado:');
-
-            // Verifica se o usuário acertou
-            //if (letraDigitada === letraEscolhida) {
-            //  console.log('Acertou!');
-            //} else {
-            //  console.log('Errou!');
-            //}
-        }
-
-
-        function desenhaTabela() {
-            const tabela = document.getElementById("tabela");
-            var texto = "";
-
-            var i = 0;
-            for (let letra in morseCode) {
-                const codigoMorse = morseCode[letra];
-                texto += letra + ":\t" + codigoMorse + "\t";
-                i++;
-                if (i % 3 == 0) {
-                    texto += "\n";
-                }
-
-            }
-
-            tabela.innerText = texto;
-
-        }
-        desenhaTabela();
-    </script>
-
-    <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
-    <!-- Adicionando o script da biblioteca Twitter Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+  <!-- Adicionando o script da biblioteca Twitter Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"></script>
 </body>
 
 </html>
