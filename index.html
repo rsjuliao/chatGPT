@@ -42,12 +42,14 @@
 <body>
   <div class="container">
     <h1>Código Morse</h1>
-    <p>Escreva a frase abaixo em código Morse e pressione Enter:</p>
+    <p>Funciona assim: Digite uma letra e aperte enter para saber se acertou!:</p>
     <input type="text" id="fraseMorse">
     <div id="pontuacao">Pontuação: 0</div>
     <h1>
       <pre><div id="tabela" style="font-family: Arial;">tabela</div></pre>
     </h1>
+    <label for="volume-control">Volume:</label>
+<input type="range" id="volume-control" min="0" max="1" step="0.01" value="1">
 
   </div>
 
@@ -75,17 +77,17 @@
 
     var frase = "";
 
-    fraseAleatorio();
+
     // Adicionando um listener para o evento "keyup" na caixa de texto
     inputFrase.addEventListener("keyup", function (event) {
       if (event.key === "Enter") { // Se o Enter foi pressionado
         const fraseDigitada = inputFrase.value.trim(); // Obtendo o valor da caixa de texto e removendo espaços em branco
         if (fraseDigitada === frase) { // Se a frase digitada for igual à frase em Morse
           pontos++; // Incrementa a pontuação
-          divPontuacao.innerText = "Pontuação: " + pontos; // Atualiza o texto da div da pontuação
+          divPontuacao.innerText = "Pontuação: " + pontos +" 😃"; // Atualiza o texto da div da pontuação
         } else {
-          pontos = 0;
-          divPontuacao.innerText = "ERROU!!!!"; // Atualiza o texto da div da pontuação
+          pontos /= 2;
+          divPontuacao.innerText = "Pontuação: " + pontos +" 🤣"; // Atualiza o texto da div da pontuação
         }
         inputFrase.value = ""; // Limpa a caixa de texto
         fraseAleatorio();
@@ -97,23 +99,40 @@
 
 
     function beep(t, f) {
-      return new Promise(function (resolve, reject) {
-        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        var oscillator = audioCtx.createOscillator();
-        oscillator.type = "triangle";
-        oscillator.frequency.value = f;
-        oscillator.connect(audioCtx.destination);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + t / 1000);
+  return new Promise(function (resolve, reject) {
+    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Create a GainNode for volume control
+    var gainNode = audioCtx.createGain();
+    var volumeControl = document.getElementById("volume-control");
+    gainNode.gain.value = volumeControl.value;
+    
+    var oscillator = audioCtx.createOscillator();
+    oscillator.type = "triangle";
+    oscillator.frequency.value = f;
+    
+    // Connect the oscillator to the GainNode and the GainNode to the destination
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + t / 1000);
 
-        // Libera a instância de áudio após a reprodução
-        oscillator.onended = function () {
-          oscillator.disconnect();
-          audioCtx.close();
-          resolve();
-        };
-      });
-    }
+    // Update volume when the user moves the volume control
+   
+    volumeControl.addEventListener("input", function() {
+      gainNode.gain.value = volumeControl.value;
+    });
+
+    // Libera a instância de áudio após a reprodução
+    oscillator.onended = function () {
+      oscillator.disconnect();
+      gainNode.disconnect();
+      audioCtx.close();
+      resolve();
+    };
+  });
+}
 
 
 
@@ -158,7 +177,7 @@
           await playMorse(morseChar[i], 107, 450);
         }
       } else {
-        console.log(`A letra "${letter}" não tem uma representação em código Morse.`);
+       
       }
     }
 
@@ -175,7 +194,8 @@
 
 
     async function fraseAleatorio() {
-      const letras = Object.keys(morseCode);
+      const subMorseCode = Object.entries(morseCode).slice(0, pontos + 1);
+      const letras = Object.keys(subMorseCode);
       const letraEscolhida = letras[Math.floor(Math.random() * letras.length)];
       frase = letraEscolhida;
       await playFrase(letraEscolhida);
@@ -210,7 +230,7 @@
       var i = 0;
       for (let letra in morseCode) {
         const codigoMorse = morseCode[letra];
-        texto += letra + ":\t" + codigoMorse + "\t";
+        texto += letra + ")\t" + codigoMorse + "\t";
         i++;
         if (i % 3 == 0) {
           texto += "\n";
