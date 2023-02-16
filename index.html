@@ -86,7 +86,7 @@
           pontos++; // Incrementa a pontuação
           divPontuacao.innerText = "Pontuação: " + pontos +" 😃"; // Atualiza o texto da div da pontuação
         } else {
-          pontos /= 2;
+          pontos = pontos*90/100;
           divPontuacao.innerText = "Pontuação: " + pontos +" 🤣"; // Atualiza o texto da div da pontuação
         }
         inputFrase.value = ""; // Limpa a caixa de texto
