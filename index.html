@@ -230,8 +230,10 @@
 
     async function fraseAleatorio() {
       const subMorseCode = Object.entries(morseCode).slice(0, pontos + 1);
-      const letras = Object.keys(subMorseCode);
-      const letraEscolhida = letras[Math.floor(Math.random() * letras.length)];
+      const letras = Object.values(subMorseCode);
+      //const letraEscolhida = letras[Math.floor(Math.random() * letras.length)].key;
+      const letraEscolhida =  Object.values(subMorseCode)[parseInt(Math.random() * letras.length)][0];
+     
       frase = letraEscolhida;
       await playFrase(letraEscolhida);
 
