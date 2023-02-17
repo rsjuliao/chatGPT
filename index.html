@@ -36,12 +36,34 @@
       text-align: center;
       margin-bottom: 50px;
     }
+
+    @keyframes explode {
+      from {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      to {
+        transform: scale(3);
+        opacity: 0;
+      }
+    }
+
+    .firework-particle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #ff0;
+      animation: explode 0.5s linear;
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
     <h1>Código Morse</h1>
+    <div id="firework-container"></div>
     <p>Funciona assim: Digite uma letra e aperte enter para saber se acertou!:</p>
     <input type="text" id="fraseMorse">
     <div id="pontuacao">Pontuação: 0</div>
@@ -49,7 +71,9 @@
       <pre><div id="tabela" style="font-family: Arial;">tabela</div></pre>
     </h1>
     <label for="volume-control">Volume:</label>
-<input type="range" id="volume-control" min="0" max="1" step="0.01" value="1">
+    <input type="range" id="volume-control" min="0" max="1" step="0.01" value="1">
+
+
 
   </div>
 
@@ -75,7 +99,7 @@
     const inputFrase = document.getElementById("fraseMorse");
     const divPontuacao = document.getElementById("pontuacao");
 
-    var frase = "";
+    var frase = "0";
 
 
     // Adicionando um listener para o evento "keyup" na caixa de texto
@@ -84,10 +108,18 @@
         const fraseDigitada = inputFrase.value.trim(); // Obtendo o valor da caixa de texto e removendo espaços em branco
         if (fraseDigitada === frase) { // Se a frase digitada for igual à frase em Morse
           pontos++; // Incrementa a pontuação
-          divPontuacao.innerText = "Pontuação: " + pontos +" 😃"; // Atualiza o texto da div da pontuação
+          divPontuacao.innerText = "Pontuação: " + pontos + " 😃"; // Atualiza o texto da div da pontuação
+          const container = document.getElementById("firework-container");
+
+          continuaAnimacao=true;
+          createFireworkInterval(container);
+          
+
         } else {
-          pontos = pontos*90/100;
-          divPontuacao.innerText = "Pontuação: " + pontos +" 🤣"; // Atualiza o texto da div da pontuação
+          pontos = pontos * 90 / 100;
+          pontos = pontos.toFixed(1);
+          divPontuacao.innerText = "Pontuação: " + pontos + " 🤣"; // Atualiza o texto da div da pontuação
+          continuaAnimacao=false;
         }
         inputFrase.value = ""; // Limpa a caixa de texto
         fraseAleatorio();
@@ -99,40 +131,40 @@
 
 
     function beep(t, f) {
-  return new Promise(function (resolve, reject) {
-    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // Create a GainNode for volume control
-    var gainNode = audioCtx.createGain();
-    var volumeControl = document.getElementById("volume-control");
-    gainNode.gain.value = volumeControl.value;
-    
-    var oscillator = audioCtx.createOscillator();
-    oscillator.type = "triangle";
-    oscillator.frequency.value = f;
-    
-    // Connect the oscillator to the GainNode and the GainNode to the destination
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + t / 1000);
+      return new Promise(function (resolve, reject) {
+        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // Update volume when the user moves the volume control
-   
-    volumeControl.addEventListener("input", function() {
-      gainNode.gain.value = volumeControl.value;
-    });
+        // Create a GainNode for volume control
+        var gainNode = audioCtx.createGain();
+        var volumeControl = document.getElementById("volume-control");
+        gainNode.gain.value = volumeControl.value;
 
-    // Libera a instância de áudio após a reprodução
-    oscillator.onended = function () {
-      oscillator.disconnect();
-      gainNode.disconnect();
-      audioCtx.close();
-      resolve();
-    };
-  });
-}
+        var oscillator = audioCtx.createOscillator();
+        oscillator.type = "triangle";
+        oscillator.frequency.value = f;
+
+        // Connect the oscillator to the GainNode and the GainNode to the destination
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + t / 1000);
+
+        // Update volume when the user moves the volume control
+
+        volumeControl.addEventListener("input", function () {
+          gainNode.gain.value = volumeControl.value;
+        });
+
+        // Libera a instância de áudio após a reprodução
+        oscillator.onended = function () {
+          oscillator.disconnect();
+          gainNode.disconnect();
+          audioCtx.close();
+          resolve();
+        };
+      });
+    }
 
 
 
@@ -151,12 +183,15 @@
       switch (char) {
         case '.':
           await beep(dot, frequency);
+          await beep(dot, 0);
           break;
         case '-':
           await beep(dash, frequency);
+          await beep(dot, 0);
           break;
         case ' ':
           await beep(pauseTime, 0);
+          await beep(dot, 0);
           break;
         default:
           console.log('Invalid Morse character: ' + char);
@@ -177,7 +212,7 @@
           await playMorse(morseChar[i], 107, 450);
         }
       } else {
-       
+
       }
     }
 
@@ -242,6 +277,44 @@
 
     }
     desenhaTabela();
+
+
+    function createFirework(x, y, container) {
+      const particleCount = 30;
+      const angleIncrement = (2 * Math.PI) / particleCount;
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement("div");
+        particle.classList.add("firework-particle");
+        container.appendChild(particle);
+        const angle = i * angleIncrement;
+        const speed = 0.2 + Math.random() * 0.5;
+        const vx = Math.sin(angle) * speed;
+        const vy = Math.cos(angle) * speed;
+        const particleAnimation = particle.animate(
+          [
+            { transform: `translate(${x}px, ${y}px)` },
+            { transform: `translate(${x + vx * 100}px, ${y + vy * 100}px)` },
+          ],
+          {
+            duration: 1000,
+            easing: "ease-out",
+          }
+        );
+        particleAnimation.onfinish = () => particle.remove();
+      }
+    }
+    var continuaAnimacao = true;
+    function createFireworkInterval(container) {
+      const x = Math.random() * container.clientWidth;
+      const y = Math.random() * container.clientHeight;
+      createFirework(x, y, container);
+      if (continuaAnimacao==true) {
+        setTimeout(() => createFireworkInterval(container), 1000 + Math.random() * 2000);
+      }
+    }
+
+
+
   </script>
 
   <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
