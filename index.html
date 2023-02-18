@@ -70,8 +70,12 @@
     <h1>
       <pre><div id="tabela" style="font-family: Arial;">tabela</div></pre>
     </h1>
-    <label for="volume-control">Volume:</label>
-    <input type="range" id="volume-control" min="0" max="1" step="0.01" value="1">
+    <label for="volume-control">Volume:</label><br/>
+    <input type="range" id="volume-control" min="0" max="1" step="0.01" value="0.5">
+    <br/>
+    <br/>
+    <label for="volume-control">Frequência:</label><br/>
+    <input type="range" id="frequencia-control" min="0" max="1" step="0.01" value="0.5">
 
 
 
@@ -141,7 +145,9 @@
 
         var oscillator = audioCtx.createOscillator();
         oscillator.type = "triangle";
-        oscillator.frequency.value = f;
+
+        var frequenciaControl = document.getElementById("frequencia-control").value;
+        oscillator.frequency.value = f*frequenciaControl;
 
         // Connect the oscillator to the GainNode and the GainNode to the destination
         oscillator.connect(gainNode);
