@@ -107,8 +107,14 @@
 
 
     // Adicionando um listener para o evento "keyup" na caixa de texto
-    inputFrase.addEventListener("keyup", function (event) {
+    inputFrase.addEventListener("keyup", async function (event) {
+      
       if (event.key === "Enter") { // Se o Enter foi pressionado
+        var inputfraseMorse = document.getElementById("fraseMorse");
+        if( inputfraseMorse.readOnly == true){
+          exit;
+        }
+        inputfraseMorse.readOnly = true;
         const fraseDigitada = inputFrase.value.trim(); // Obtendo o valor da caixa de texto e removendo espaços em branco
         if (fraseDigitada === frase) { // Se a frase digitada for igual à frase em Morse
           pontos++; // Incrementa a pontuação
@@ -126,9 +132,11 @@
           continuaAnimacao=false;
         }
         inputFrase.value = ""; // Limpa a caixa de texto
-        fraseAleatorio();
+        await fraseAleatorio();
+        inputfraseMorse.readOnly = false;
 
       }
+      desenhaTabela();
     });
 
 
@@ -275,6 +283,9 @@
         const codigoMorse = morseCode[letra];
         texto += letra + ")\t" + codigoMorse + "\t";
         i++;
+        if(i>pontos){
+          break;
+        }
         if (i % 3 == 0) {
           texto += "\n";
         }
