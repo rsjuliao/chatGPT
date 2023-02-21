@@ -107,7 +107,7 @@
       '6': '-....', '7': '--...', '8': '---..', '9': '----.'
     };
     // Inicializando a pontuação
-    let pontos = 0;
+    let pontos = 0.0;
 
 
 
@@ -139,7 +139,7 @@
 
         } else {
           pontos = pontos * 90 / 100;
-          pontos = pontos.toFixed(1);
+          pontos = parseFloat(pontos.toFixed(1));
           divPontuacao.innerText = "Pontuação: " + pontos + " 🤣"; // Atualiza o texto da div da pontuação
           continuaAnimacao = false;
         }
@@ -246,7 +246,7 @@
     async function playFraseAgain(frase) {
       if (tocando == false) {
         tocando = true;
-        pontos=(pontos-0.1).toFixed(1);
+        pontos=parseFloat((pontos-0.1).toFixed(1));
         if (pontos < 0) {
           pontos = 0;
         }
