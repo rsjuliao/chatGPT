@@ -57,6 +57,17 @@
       background-color: #ff0;
       animation: explode 0.5s linear;
     }
+
+    button.circular-button {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      outline: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -66,15 +77,16 @@
     <div id="firework-container"></div>
     <p>Funciona assim: Digite uma letra e aperte enter para saber se acertou!:</p>
     <input type="text" id="fraseMorse">
+    <button class="circular-button" onclick="playFraseAgain(frase)">🙉-1</button>
     <div id="pontuacao">Pontuação: 0</div>
     <h1>
       <pre><div id="tabela" style="font-family: Arial;">tabela</div></pre>
     </h1>
-    <label for="volume-control">Volume:</label><br/>
+    <label for="volume-control">Volume:</label><br />
     <input type="range" id="volume-control" min="0" max="1" step="0.01" value="0.5">
-    <br/>
-    <br/>
-    <label for="volume-control">Frequência:</label><br/>
+    <br />
+    <br />
+    <label for="volume-control">Frequência:</label><br />
     <input type="range" id="frequencia-control" min="0" max="1" step="0.01" value="0.5">
 
 
@@ -108,10 +120,10 @@
 
     // Adicionando um listener para o evento "keyup" na caixa de texto
     inputFrase.addEventListener("keyup", async function (event) {
-      
+
       if (event.key === "Enter") { // Se o Enter foi pressionado
         var inputfraseMorse = document.getElementById("fraseMorse");
-        if( inputfraseMorse.readOnly == true){
+        if (inputfraseMorse.readOnly == true) {
           exit;
         }
         inputfraseMorse.readOnly = true;
@@ -121,15 +133,15 @@
           divPontuacao.innerText = "Pontuação: " + pontos + " 😃"; // Atualiza o texto da div da pontuação
           const container = document.getElementById("firework-container");
 
-          continuaAnimacao=true;
+          continuaAnimacao = true;
           createFireworkInterval(container);
-          
+
 
         } else {
           pontos = pontos * 90 / 100;
           pontos = pontos.toFixed(1);
           divPontuacao.innerText = "Pontuação: " + pontos + " 🤣"; // Atualiza o texto da div da pontuação
-          continuaAnimacao=false;
+          continuaAnimacao = false;
         }
         inputFrase.value = ""; // Limpa a caixa de texto
         await fraseAleatorio();
@@ -155,7 +167,7 @@
         oscillator.type = "triangle";
 
         var frequenciaControl = document.getElementById("frequencia-control").value;
-        oscillator.frequency.value = f*frequenciaControl;
+        oscillator.frequency.value = f * frequenciaControl;
 
         // Connect the oscillator to the GainNode and the GainNode to the destination
         oscillator.connect(gainNode);
@@ -230,6 +242,21 @@
       }
     }
 
+    var tocando = false;
+    async function playFraseAgain(frase) {
+      if (tocando == false) {
+        tocando = true;
+        pontos=(pontos-0.1).toFixed(1);
+        if (pontos < 0) {
+          pontos = 0;
+        }
+         divPontuacao.innerText = "Pontuação: " + pontos + "🤓";
+
+        await playFrase(frase);
+        tocando = false;
+      }
+    }
+
 
     async function playFrase(frase) {
       for (var i = 0; i < frase.length; i++) {
@@ -246,8 +273,8 @@
       const subMorseCode = Object.entries(morseCode).slice(0, pontos + 1);
       const letras = Object.values(subMorseCode);
       //const letraEscolhida = letras[Math.floor(Math.random() * letras.length)].key;
-      const letraEscolhida =  Object.values(subMorseCode)[parseInt(Math.random() * letras.length)][0];
-     
+      const letraEscolhida = Object.values(subMorseCode)[parseInt(Math.random() * letras.length)][0];
+
       frase = letraEscolhida;
       await playFrase(letraEscolhida);
 
@@ -283,7 +310,7 @@
         const codigoMorse = morseCode[letra];
         texto += letra + ")\t" + codigoMorse + "\t";
         i++;
-        if(i>pontos){
+        if (i > pontos) {
           break;
         }
         if (i % 3 == 0) {
@@ -327,7 +354,7 @@
       const x = Math.random() * container.clientWidth;
       const y = Math.random() * container.clientHeight;
       createFirework(x, y, container);
-      if (continuaAnimacao==true) {
+      if (continuaAnimacao == true) {
         setTimeout(() => createFireworkInterval(container), 1000 + Math.random() * 2000);
       }
     }
