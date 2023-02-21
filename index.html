@@ -68,6 +68,25 @@
       outline: none;
       cursor: pointer;
     }
+
+    .containerTabela {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      border-radius: 10px;
+      /* define o raio da borda arredondada */
+      border: 2px solid rgba(54, 0, 0, 0.637);
+      padding: 20px;
+      text-align:center;
+    }
+
+    .block {
+      width: calc(100% / 5);
+      /* definir a largura do bloco com base no número de colunas */
+      height: 50px;
+      /* definir a altura do bloco */
+      text-align:left;
+    }
   </style>
 </head>
 
@@ -79,9 +98,9 @@
     <input type="text" id="fraseMorse">
     <button class="circular-button" onclick="playFraseAgain(frase)">🙉-1</button>
     <div id="pontuacao">Pontuação: 0</div>
-    <h1>
-      <pre><div id="tabela" style="font-family: Arial;">tabela</div></pre>
-    </h1>
+
+    <pre> <div id="tabelaFlex" class="containerTabela"></div></pre>
+
     <label for="volume-control">Volume:</label><br />
     <input type="range" id="volume-control" min="0" max="1" step="0.01" value="0.5">
     <br />
@@ -144,11 +163,12 @@
           continuaAnimacao = false;
         }
         inputFrase.value = ""; // Limpa a caixa de texto
-        await fraseAleatorio();
+        await fraseAleatoria();
         inputfraseMorse.readOnly = false;
 
       }
-      desenhaTabela();
+
+      desenhaTabelaFlex();
     });
 
 
@@ -246,11 +266,11 @@
     async function playFraseAgain(frase) {
       if (tocando == false) {
         tocando = true;
-        pontos=parseFloat((pontos-0.1).toFixed(1));
+        pontos = parseFloat((pontos - 0.1).toFixed(1));
         if (pontos < 0) {
           pontos = 0;
         }
-         divPontuacao.innerText = "Pontuação: " + pontos + "🤓";
+        divPontuacao.innerText = "Pontuação: " + pontos + "🤓";
 
         await playFrase(frase);
         tocando = false;
@@ -269,11 +289,20 @@
 
 
 
-    async function fraseAleatorio() {
+    async function fraseAleatoria() {
       const subMorseCode = Object.entries(morseCode).slice(0, pontos + 1);
       const letras = Object.values(subMorseCode);
       //const letraEscolhida = letras[Math.floor(Math.random() * letras.length)].key;
-      const letraEscolhida = Object.values(subMorseCode)[parseInt(Math.random() * letras.length)][0];
+      var r1 = Math.random();
+      var r2=0;
+      if(r1>0.2){
+        // então será um valor acida de 60%
+        r2=Math.random()*6/10+(10-6)/10;
+      }else{
+        //será o valor atual
+        r2=Math.random();
+      }
+      const letraEscolhida = Object.values(subMorseCode)[parseInt(r2 * letras.length)][0];
 
       frase = letraEscolhida;
       await playFrase(letraEscolhida);
@@ -301,28 +330,31 @@
     }
 
 
-    function desenhaTabela() {
-      const tabela = document.getElementById("tabela");
+
+
+    function desenhaTabelaFlex() {
+      const tabela = document.getElementById("tabelaFlex");
       var texto = "";
 
       var i = 0;
       for (let letra in morseCode) {
         const codigoMorse = morseCode[letra];
-        texto += letra + ")\t" + codigoMorse + "\t";
+        // <div class="block">bloco de informação 1</div>
+        texto += "<div class='block'>" + letra + ") " + codigoMorse + "</div>";
         i++;
         if (i > pontos) {
           break;
         }
-        if (i % 3 == 0) {
-          texto += "\n";
-        }
-
       }
 
-      tabela.innerText = texto;
+      tabela.innerHTML = texto;
 
     }
-    desenhaTabela();
+
+
+
+    desenhaTabelaFlex();
+
 
 
     function createFirework(x, y, container) {
@@ -349,6 +381,7 @@
         particleAnimation.onfinish = () => particle.remove();
       }
     }
+
     var continuaAnimacao = true;
     function createFireworkInterval(container) {
       const x = Math.random() * container.clientWidth;

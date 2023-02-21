@@ -8,7 +8,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Open index.html",
-            "file": "c:\\Users\\rrsjuliao\\Downloads\\chatGPT\\morse\\html\\index.html"
+            "file": "c:\\Users\\rrsjuliao\\Downloads\\chatGPT\\morse\\html\\index.html",
         }
     ]
 }
