@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Código Morse</title>
+  <meta charset="utf-8">
+
+  <!-- Adicionando a biblioteca Twitter Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
+
+  <style>
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding-top: 50px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      margin-bottom: 20px;
+    }
+
+    #pontuacao {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    @keyframes explode {
+      from {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      to {
+        transform: scale(3);
+        opacity: 0;
+      }
+    }
+
+    .firework-particle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #ff0;
+      animation: explode 0.5s linear;
+    }
+
+    button.circular-button {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .containerTabela {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      border-radius: 10px;
+      /* define o raio da borda arredondada */
+      border: 2px solid rgba(54, 0, 0, 0.637);
+      padding: 20px;
+      text-align:center;
+    }
+
+    .block {
+      width: calc(100% / 5);
+      /* definir a largura do bloco com base no número de colunas */
+      height: 50px;
+      /* definir a altura do bloco */
+      text-align:left;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Código Morse</h1>
+    <div id="firework-container"></div>
+    <p>Funciona assim: Digite uma letra e aperte enter para saber se acertou!:</p>
+    <input type="text" id="fraseMorse">
+    <button class="circular-button" onclick="playFraseAgain(frase)">🙉-1</button>
+    <div id="pontuacao">Pontuação: 0</div>
+
+    <pre> <div id="tabelaFlex" class="containerTabela"></div></pre>
+
+    <label for="volume-control">Volume:</label><br />
+    <input type="range" id="volume-control" min="0" max="1" step="0.01" value="0.5">
+    <br />
+    <br />
+    <label for="volume-control">Frequência:</label><br />
+    <input type="range" id="frequencia-control" min="0" max="1" step="0.01" value="0.5">
+
+
+
+  </div>
+
+  <script>
+
+    const morseCode = {
+      'a': '.-', 'b': '-...', 'c': '-.-.', 'd': '-..',
+      'e': '.', 'f': '..-.', 'g': '--.', 'h': '....',
+      'i': '..', 'j': '.---', 'k': '-.-', 'l': '.-..',
+      'm': '--', 'n': '-.', 'o': '---', 'p': '.--.',
+      'q': '--.-', 'r': '.-.', 's': '...', 't': '-',
+      'u': '..-', 'v': '...-', 'w': '.--', 'x': '-..-',
+      'y': '-.--', 'z': '--..', '0': '-----', '1': '.----',
+      '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+      '6': '-....', '7': '--...', '8': '---..', '9': '----.'
+    };
+    // Inicializando a pontuação
+    let pontos = 0.0;
+
+
+
+    // Obtendo a caixa de texto e a div da pontuação
+    const inputFrase = document.getElementById("fraseMorse");
+    const divPontuacao = document.getElementById("pontuacao");
+
+    var frase = "0";
+
+
+    // Adicionando um listener para o evento "keyup" na caixa de texto
+    inputFrase.addEventListener("keyup", async function (event) {
+
+      if (event.key === "Enter") { // Se o Enter foi pressionado
+        var inputfraseMorse = document.getElementById("fraseMorse");
+        if (inputfraseMorse.readOnly == true) {
+          exit;
+        }
+        inputfraseMorse.readOnly = true;
+        const fraseDigitada = inputFrase.value.trim(); // Obtendo o valor da caixa de texto e removendo espaços em branco
+        if (fraseDigitada === frase) { // Se a frase digitada for igual à frase em Morse
+          pontos++; // Incrementa a pontuação
+          divPontuacao.innerText = "Pontuação: " + pontos + " 😃"; // Atualiza o texto da div da pontuação
+          const container = document.getElementById("firework-container");
+
+          continuaAnimacao = true;
+          createFireworkInterval(container);
+
+
+        } else {
+          pontos = pontos * 90 / 100;
+          pontos = parseFloat(pontos.toFixed(1));
+          divPontuacao.innerText = "Pontuação: " + pontos + " 🤣"; // Atualiza o texto da div da pontuação
+          continuaAnimacao = false;
+        }
+        inputFrase.value = ""; // Limpa a caixa de texto
+        await fraseAleatoria();
+        inputfraseMorse.readOnly = false;
+
+      }
+
+      desenhaTabelaFlex();
+    });
+
+
+
+
+    function beep(t, f) {
+      return new Promise(function (resolve, reject) {
+        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Create a GainNode for volume control
+        var gainNode = audioCtx.createGain();
+        var volumeControl = document.getElementById("volume-control");
+        gainNode.gain.value = volumeControl.value;
+
+        var oscillator = audioCtx.createOscillator();
+        oscillator.type = "triangle";
+
+        var frequenciaControl = document.getElementById("frequencia-control").value;
+        oscillator.frequency.value = f * frequenciaControl;
+
+        // Connect the oscillator to the GainNode and the GainNode to the destination
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + t / 1000);
+
+        // Update volume when the user moves the volume control
+
+        volumeControl.addEventListener("input", function () {
+          gainNode.gain.value = volumeControl.value;
+        });
+
+        // Libera a instância de áudio após a reprodução
+        oscillator.onended = function () {
+          oscillator.disconnect();
+          gainNode.disconnect();
+          audioCtx.close();
+          resolve();
+        };
+      });
+    }
+
+
+
+
+
+
+
+    // função que reproduz um caractere morse com a unidade de tempo e frequência especificadas
+    async function playMorse(char, timeUnit, frequency) {
+      var beepTime = timeUnit * 3;
+
+      var dot = timeUnit;
+      var dash = timeUnit * 3;
+      var pauseTime = timeUnit * 3;
+
+      switch (char) {
+        case '.':
+          await beep(dot, frequency);
+          await beep(dot, 0);
+          break;
+        case '-':
+          await beep(dash, frequency);
+          await beep(dot, 0);
+          break;
+        case ' ':
+          await beep(pauseTime, 0);
+          await beep(dot, 0);
+          break;
+        default:
+          console.log('Invalid Morse character: ' + char);
+      }
+    }
+
+
+
+
+    async function playMorseForLetter(letter) {
+
+
+      const letterLowerCase = letter.toLowerCase();
+      const morseChar = morseCode[letterLowerCase];
+
+      if (morseChar) {
+        for (let i = 0; i < morseChar.length; i++) {
+          await playMorse(morseChar[i], 107, 450);
+        }
+      } else {
+
+      }
+    }
+
+    var tocando = false;
+    async function playFraseAgain(frase) {
+      if (tocando == false) {
+        tocando = true;
+        pontos = parseFloat((pontos - 0.1).toFixed(1));
+        if (pontos < 0) {
+          pontos = 0;
+        }
+        divPontuacao.innerText = "Pontuação: " + pontos + "🤓";
+
+        await playFrase(frase);
+        tocando = false;
+      }
+    }
+
+
+    async function playFrase(frase) {
+      for (var i = 0; i < frase.length; i++) {
+        var letter = frase[i];
+        await playMorseForLetter(letter);
+        await playMorseForLetter(' ');
+
+      }
+    }
+
+
+
+    async function fraseAleatoria() {
+      const subMorseCode = Object.entries(morseCode).slice(0, pontos + 1);
+      const letras = Object.values(subMorseCode);
+      //const letraEscolhida = letras[Math.floor(Math.random() * letras.length)].key;
+      var r1 = Math.random();
+      var r2=0;
+      if(r1>0.2){
+        // então será um valor acida de 60%
+        r2=Math.random()*6/10+(10-6)/10;
+      }else{
+        //será o valor atual
+        r2=Math.random();
+      }
+      const letraEscolhida = Object.values(subMorseCode)[parseInt(r2 * letras.length)][0];
+
+      frase = letraEscolhida;
+      await playFrase(letraEscolhida);
+
+    }
+    async function jogoMorse() {
+      // Escolhe uma letra aleatória do objeto morseCode
+      const letras = Object.keys(morseCode);
+      const letraEscolhida = letras[Math.floor(Math.random() * letras.length)];
+
+      // Toca o áudio correspondente à letra escolhida
+      const codigo = morseCode[letraEscolhida];
+      console.log('caracter escolhido: ' + letraEscolhida);
+      await playFrase(letraEscolhida);
+
+      // Espera o usuário digitar uma letra
+      //const letraDigitada = prompt('Digite a letra correspondente ao código Morse tocado:');
+
+      // Verifica se o usuário acertou
+      //if (letraDigitada === letraEscolhida) {
+      //  console.log('Acertou!');
+      //} else {
+      //  console.log('Errou!');
+      //}
+    }
+
+
+
+
+    function desenhaTabelaFlex() {
+      const tabela = document.getElementById("tabelaFlex");
+      var texto = "";
+
+      var i = 0;
+      for (let letra in morseCode) {
+        const codigoMorse = morseCode[letra];
+        // <div class="block">bloco de informação 1</div>
+        texto += "<div class='block'>" + letra + ") " + codigoMorse + "</div>";
+        i++;
+        if (i > pontos) {
+          break;
+        }
+      }
+
+      tabela.innerHTML = texto;
+
+    }
+
+
+
+    desenhaTabelaFlex();
+
+
+
+    function createFirework(x, y, container) {
+      const particleCount = 30;
+      const angleIncrement = (2 * Math.PI) / particleCount;
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement("div");
+        particle.classList.add("firework-particle");
+        container.appendChild(particle);
+        const angle = i * angleIncrement;
+        const speed = 0.2 + Math.random() * 0.5;
+        const vx = Math.sin(angle) * speed;
+        const vy = Math.cos(angle) * speed;
+        const particleAnimation = particle.animate(
+          [
+            { transform: `translate(${x}px, ${y}px)` },
+            { transform: `translate(${x + vx * 100}px, ${y + vy * 100}px)` },
+          ],
+          {
+            duration: 1000,
+            easing: "ease-out",
+          }
+        );
+        particleAnimation.onfinish = () => particle.remove();
+      }
+    }
+
+    var continuaAnimacao = true;
+    function createFireworkInterval(container) {
+      const x = Math.random() * container.clientWidth;
+      const y = Math.random() * container.clientHeight;
+      createFirework(x, y, container);
+      if (continuaAnimacao == true) {
+        setTimeout(() => createFireworkInterval(container), 1000 + Math.random() * 2000);
+      }
+    }
+
+
+
+  </script>
+
+  <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+  <!-- Adicionando o script da biblioteca Twitter Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>
